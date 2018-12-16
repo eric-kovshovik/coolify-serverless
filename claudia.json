@@ -1,0 +1,10 @@
+{
+  "lambda": {
+    "role": "coolify-serverless-executor",
+    "name": "coolify-serverless",
+    "region": "us-west-1"
+  },
+  "api": {
+    "id": "ao4nzzlgve"
+  }
+}
