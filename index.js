@@ -6,27 +6,8 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 const app = express()
 
-const clientId = '2915741764.485844475751'       // process.env.CLIENT_ID;
-const clientSecret = 'ec018124f52db018d1264c58cc701566'         //process.env.CLIENT_SECRET;
-
-function sendMessageToSlackResponseURL(responseURL, JSONmessage){
-  var postOptions = {
-    uri: responseURL,
-    method: 'POST',
-    // statusCode: 200,
-    headers: {
-      'Content-type': 'application/json'
-    },
-    json: JSONmessage
-  };
-  request(postOptions, (error, response, body) => {
-    // response.status(200).end();
-    response.send({"isBase64Encoded": true, "statusCode": 200, "headers": { }, "body": ""});
-    if (error){
-      // handle errors as you see fit
-    }
-  })
-}
+const clientId = process.env.CLIENT_ID       // process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
 
 app.get('/',function(req,res){
   res.sendFile(__dirname + '/index.html');
@@ -75,12 +56,10 @@ function parseCommand(name) {
 }
 
 app.post('/chuck_joke', urlencodedParser, (req, res) => {
-  // res.status(200).send('ebany pesos');
   var reqBody = req.body;
-  var responseURL = reqBody.response_url;
   var coolified_person = getText(req);
   var params = parseCommand(coolified_person);
-  if (reqBody.token != '5ZuxGCfL84ENPqiuOcGI2R9d'){  // process.env.CLIENT_TOKEN
+  if (reqBody.token != process.env.CLIENT_TOKEN){
     res.status(403).end("Access forbidden")
   }else {
     request({
@@ -112,7 +91,7 @@ app.post('/chuck_joke', urlencodedParser, (req, res) => {
                   "name": "next",
                   "text": "next",
                   "type": "button",
-                  "value": params_string        // params_string
+                  "value": params_string
                 },
                 {
                   "name": "don't send",
@@ -125,15 +104,13 @@ app.post('/chuck_joke', urlencodedParser, (req, res) => {
             }
           ]
         };
-        sendMessageToSlackResponseURL(responseURL, message)
+        res.send(message);
       }
     })
   }
 });
 
 app.post('/slack/actions', urlencodedParser, (req, res) =>{
-  // res.status(200).send('ebany nasos ');
-  console.log('HUJ')
   var actionJSONPayload = JSON.parse(req.body.payload);
   if (actionJSONPayload.actions[0].name == "send") {
     var payload = JSON.parse(req.body.payload)
@@ -144,7 +121,7 @@ app.post('/slack/actions', urlencodedParser, (req, res) =>{
       "replace_original": false,
       "delete_original": true
     };
-    sendMessageToSlackResponseURL(actionJSONPayload.response_url, message);
+    res.send(message);
   }
   if (actionJSONPayload.actions[0].name == "next"){
     var payload = JSON.parse(req.body.payload)
@@ -194,7 +171,7 @@ app.post('/slack/actions', urlencodedParser, (req, res) =>{
             }
           ]
         };
-        sendMessageToSlackResponseURL(actionJSONPayload.response_url, message);
+        res.send(message);
       }
     });
   }
@@ -203,7 +180,7 @@ app.post('/slack/actions', urlencodedParser, (req, res) =>{
       "text": "",
       "delete_original": true
     };
-    sendMessageToSlackResponseURL(actionJSONPayload.response_url, message);
+    res.send(message);
   }
 });
 
